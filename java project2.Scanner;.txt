@@ -1,0 +1,180 @@
+import java.util.Scanner;
+
+public class StudentGradeCalculator {
+
+    public static void main(String[] args) {
+
+        // Create Scanner object to take input from the user
+        Scanner sc = new Scanner(System.in);
+
+        // Display project heading
+        System.out.println("==========================================");
+        System.out.println("       STUDENT GRADE CALCULATOR");
+        System.out.println("          DecodeLabs - Project 2");
+        System.out.println("==========================================");
+
+        // Take student's name
+        System.out.print("Enter Student Name: ");
+        String studentName = sc.nextLine();
+
+        // Take student's roll number
+        System.out.print("Enter Roll Number: ");
+        String rollNumber = sc.nextLine();
+
+        // Take the number of subjects
+        int numberOfSubjects;
+
+        while (true) {
+            System.out.print("Enter Number of Subjects: ");
+
+            if (sc.hasNextInt()) {
+                numberOfSubjects = sc.nextInt();
+
+                if (numberOfSubjects > 0) {
+                    break;
+                } else {
+                    System.out.println(
+                        "Error: Number of subjects must be greater than 0."
+                    );
+                }
+            } else {
+                System.out.println(
+                    "Invalid input! Please enter a whole number."
+                );
+                sc.next();
+            }
+        }
+
+        // Create an array to store subject names and marks
+        String[] subjectNames = new String[numberOfSubjects];
+        double[] marks = new double[numberOfSubjects];
+
+        double totalMarks = 0;
+
+        // Take subject names and marks
+        System.out.println("\n------------------------------------------");
+        System.out.println("          ENTER SUBJECT DETAILS");
+        System.out.println("------------------------------------------");
+
+        for (int i = 0; i < numberOfSubjects; i++) {
+
+            System.out.print(
+                "Enter name of Subject " + (i + 1) + ": "
+            );
+
+            subjectNames[i] = sc.next();
+
+            // Validate marks
+            while (true) {
+
+                System.out.print(
+                    "Enter marks for " + subjectNames[i] + " (0-100): "
+                );
+
+                if (sc.hasNextDouble()) {
+
+                    double obtainedMarks = sc.nextDouble();
+
+                    if (obtainedMarks >= 0 && obtainedMarks <= 100) {
+
+                        marks[i] = obtainedMarks;
+                        totalMarks += obtainedMarks;
+                        break;
+
+                    } else {
+
+                        System.out.println(
+                            "Invalid marks! Marks must be between 0 and 100."
+                        );
+                    }
+
+                } else {
+
+                    System.out.println(
+                        "Invalid input! Please enter numeric marks."
+                    );
+
+                    sc.next();
+                }
+            }
+        }
+
+        // Calculate maximum possible marks
+        double maximumMarks = numberOfSubjects * 100.0;
+
+        // Calculate average percentage
+        double percentage = (totalMarks / maximumMarks) * 100.0;
+
+        // Assign grade according to percentage
+        String grade;
+        String result;
+
+        if (percentage >= 90) {
+            grade = "A+";
+        } else if (percentage >= 80) {
+            grade = "A";
+        } else if (percentage >= 70) {
+            grade = "B";
+        } else if (percentage >= 60) {
+            grade = "C";
+        } else if (percentage >= 50) {
+            grade = "D";
+        } else if (percentage >= 40) {
+            grade = "E";
+        } else {
+            grade = "F";
+        }
+
+        // Assign pass or fail status
+        if (percentage >= 40) {
+            result = "PASS";
+        } else {
+            result = "FAIL";
+        }
+
+        // Display the final result
+        System.out.println("\n\n==========================================");
+        System.out.println("             STUDENT RESULT");
+        System.out.println("==========================================");
+
+        System.out.println("Student Name       : " + studentName);
+        System.out.println("Roll Number        : " + rollNumber);
+        System.out.println("Number of Subjects : " + numberOfSubjects);
+
+        System.out.println("------------------------------------------");
+        System.out.println("             SUBJECT-WISE MARKS");
+        System.out.println("------------------------------------------");
+
+        for (int i = 0; i < numberOfSubjects; i++) {
+
+            System.out.printf(
+                "%-20s : %.2f / 100%n",
+                subjectNames[i],
+                marks[i]
+            );
+        }
+
+        System.out.println("------------------------------------------");
+
+        System.out.printf(
+            "Total Marks        : %.2f / %.2f%n",
+            totalMarks,
+            maximumMarks
+        );
+
+        System.out.printf(
+            "Average Percentage : %.2f%%%n",
+            percentage
+        );
+
+        System.out.println("Grade              : " + grade);
+        System.out.println("Result             : " + result);
+
+        System.out.println("==========================================");
+        System.out.println("     Thank you for using the program!");
+        System.out.println("==========================================");
+
+        // Close Scanner
+        sc.close();
+    }
+}

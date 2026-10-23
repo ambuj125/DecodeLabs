@@ -1,0 +1,233 @@
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+/**
+ * DecodeLabs - Java Programming Project 3
+ * ATM Interface using Object-Oriented Programming (OOP).
+ *
+ * Save this file as: ATMInterface.java
+ * Compile: javac ATMInterface.java
+ * Run:     java ATMInterface
+ */
+public class ATMInterface {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Demo account for this project. Change the PIN/balance as needed.
+        BankAccount account = new BankAccount("Ambuj Tripathi", "1234567890", 5000.00);
+        ATM atm = new ATM(account, "1234");
+
+        System.out.println("====================================");
+        System.out.println("          WELCOME TO JAVA ATM       ");
+        System.out.println("====================================");
+
+        if (!atm.login(scanner)) {
+            System.out.println("Too many incorrect attempts. Your session has ended.");
+            scanner.close();
+            return;
+        }
+
+        boolean running = true;
+        while (running) {
+            atm.displayMenu();
+            int choice = readInt(scanner, "Enter your choice: ");
+
+            switch (choice) {
+                case 1:
+                    atm.checkBalance();
+                    break;
+                case 2:
+                    double depositAmount = readAmount(scanner, "Enter amount to deposit (Rs.): ");
+                    atm.deposit(depositAmount);
+                    break;
+                case 3:
+                    double withdrawalAmount = readAmount(scanner, "Enter amount to withdraw (Rs.): ");
+                    atm.withdraw(withdrawalAmount);
+                    break;
+                case 4:
+                    atm.showTransactionHistory();
+                    break;
+                case 5:
+                    System.out.println("Thank you for using Java ATM. Please visit again!");
+                    running = false;
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please select a number from 1 to 5.");
+            }
+            System.out.println();
+        }
+
+        scanner.close();
+    }
+
+    private static int readInt(Scanner scanner, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            try {
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a whole number.");
+            }
+        }
+    }
+
+    private static double readAmount(Scanner scanner, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            try {
+                double amount = Double.parseDouble(input);
+                if (Double.isFinite(amount) && amount > 0) {
+                    return amount;
+                }
+                System.out.println("Amount must be greater than zero.");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid amount. Please enter a number, for example 500 or 250.50.");
+            }
+        }
+    }
+}
+
+class BankAccount {
+    private final String accountHolder;
+    private final String accountNumber;
+    private double balance;
+    private final List<String> transactionHistory;
+
+    public BankAccount(String accountHolder, String accountNumber, double openingBalance) {
+        this.accountHolder = accountHolder;
+        this.accountNumber = accountNumber;
+        this.balance = Math.max(0, openingBalance);
+        this.transactionHistory = new ArrayList<>();
+        addHistory("Account created. Opening balance: " + money(this.balance));
+    }
+
+    public String getAccountHolder() {
+        return accountHolder;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public boolean deposit(double amount) {
+        if (!Double.isFinite(amount) || amount <= 0) {
+            System.out.println("Transaction failed: deposit amount must be greater than zero.");
+            return false;
+        }
+
+        balance += amount;
+        addHistory("Deposit: +" + money(amount) + " | Balance: " + money(balance));
+        System.out.println("Deposit successful.");
+        System.out.println("Amount deposited: " + money(amount));
+        System.out.println("Updated balance: " + money(balance));
+        return true;
+    }
+
+    public boolean withdraw(double amount) {
+        if (!Double.isFinite(amount) || amount <= 0) {
+            System.out.println("Transaction failed: withdrawal amount must be greater than zero.");
+            return false;
+        }
+
+        if (amount > balance) {
+            System.out.println("Transaction failed: insufficient balance.");
+            System.out.println("Available balance: " + money(balance));
+            return false;
+        }
+
+        balance -= amount;
+        addHistory("Withdrawal: -" + money(amount) + " | Balance: " + money(balance));
+        System.out.println("Please collect your cash.");
+        System.out.println("Withdrawal successful.");
+        System.out.println("Amount withdrawn: " + money(amount));
+        System.out.println("Remaining balance: " + money(balance));
+        return true;
+    }
+
+    public List<String> getTransactionHistory() {
+        return new ArrayList<>(transactionHistory);
+    }
+
+    private void addHistory(String message) {
+        String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
+        transactionHistory.add(time + " - " + message);
+    }
+
+    private static String money(double amount) {
+        return String.format("Rs. %.2f", amount);
+    }
+}
+
+class ATM {
+    private final BankAccount account;
+    private final String correctPin;
+
+    public ATM(BankAccount account, String correctPin) {
+        this.account = account;
+        this.correctPin = correctPin;
+    }
+
+    public boolean login(Scanner scanner) {
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            System.out.print("Enter your 4-digit ATM PIN: ");
+            String enteredPin = scanner.nextLine().trim();
+
+            if (correctPin.equals(enteredPin)) {
+                System.out.println("\nLogin successful. Welcome, " + account.getAccountHolder() + "!");
+                System.out.println("Account number: " + account.getAccountNumber());
+                return true;
+            }
+
+            int remaining = 3 - attempt;
+            if (remaining > 0) {
+                System.out.println("Incorrect PIN. Attempts remaining: " + remaining);
+            }
+        }
+        return false;
+    }
+
+    public void displayMenu() {
+        System.out.println("---------- ATM MENU ----------");
+        System.out.println("1. Check Balance");
+        System.out.println("2. Deposit Money");
+        System.out.println("3. Withdraw Money");
+        System.out.println("4. Transaction History");
+        System.out.println("5. Exit");
+        System.out.println("------------------------------");
+    }
+
+    public void checkBalance() {
+        System.out.println("Account holder: " + account.getAccountHolder());
+        System.out.printf("Available balance: Rs. %.2f%n", account.getBalance());
+    }
+
+    public void deposit(double amount) {
+        account.deposit(amount);
+    }
+
+    public void withdraw(double amount) {
+        account.withdraw(amount);
+    }
+
+    public void showTransactionHistory() {
+        List<String> history = account.getTransactionHistory();
+        System.out.println("------- TRANSACTION HISTORY -------");
+        if (history.isEmpty()) {
+            System.out.println("No transactions found.");
+            return;
+        }
+        for (String transaction : history) {
+            System.out.println(transaction);
+        }
+        System.out.println("-----------------------------------");
+    }
+}
